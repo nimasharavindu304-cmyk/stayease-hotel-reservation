@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="BookingInvoiceReport" pageWidth="595" pageHeight="842" columnWidth="535"
+              leftMargin="30" rightMargin="30" topMargin="30" bottomMargin="30"
+              uuid="a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d">
+
+    <property name="net.sf.jasperreports.export.pdf.embedded" value="true"/>
+
+    <parameter name="BOOKING_ID" class="java.lang.Integer"/>
+
+    <queryString language="SQL">
+        <![CDATA[
+            SELECT b.booking_id,
+                   CONCAT(g.first_name, ' ', g.last_name) AS guest_name,
+                   g.phone AS guest_phone,
+                   g.email AS guest_email,
+                   r.room_number,
+                   r.room_type,
+                   b.check_in_date,
+                   b.check_out_date,
+                   DATEDIFF(b.check_out_date, b.check_in_date) AS nights,
+                   r.rate_per_night,
+                   b.total_amount,
+                   p.payment_method,
+                   p.amount AS payment_amount,
+                   p.payment_date,
+                   u.full_name AS received_by_name
+            FROM bookings b
+            JOIN guests g ON b.guest_id = g.guest_id
+            JOIN rooms  r ON b.room_id  = r.room_id
+            LEFT JOIN payments p ON p.booking_id = b.booking_id
+            LEFT JOIN users u    ON p.received_by = u.user_id
+            WHERE b.booking_id = $P{BOOKING_ID}
+        ]]>
+    </queryString>
+
+    <field name="booking_id" class="java.lang.Integer"/>
+    <field name="guest_name" class="java.lang.String"/>
+    <field name="guest_phone" class="java.lang.String"/>
+    <field name="guest_email" class="java.lang.String"/>
+    <field name="room_number" class="java.lang.String"/>
+    <field name="room_type" class="java.lang.String"/>
+    <field name="check_in_date" class="java.sql.Date"/>
+    <field name="check_out_date" class="java.sql.Date"/>
+    <field name="nights" class="java.lang.Integer"/>
+    <field name="rate_per_night" class="java.math.BigDecimal"/>
+    <field name="total_amount" class="java.math.BigDecimal"/>
+    <field name="payment_method" class="java.lang.String"/>
+    <field name="payment_amount" class="java.math.BigDecimal"/>
+    <field name="payment_date" class="java.sql.Timestamp"/>
+    <field name="received_by_name" class="java.lang.String"/>
+
+    <title>
+        <band height="90">
+            <staticText>
+                <reportElement x="0" y="0" width="535" height="30"/>
+                <textElement>
+                    <font size="20" isBold="true"/>
+                </textElement>
+                <text><![CDATA[StayEase Hotel - Booking Invoice]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="32" width="535" height="16"/>
+                <textElement>
+                    <font size="10" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Hospitality & Tourism Management System]]></text>
+            </staticText>
+            <line>
+                <reportElement x="0" y="55" width="535" height="1"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="62" width="270" height="18"/>
+                <textElement>
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Booking #" + $F{booking_id}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd-MMM-yyyy">
+                <reportElement x="330" y="62" width="205" height="18"/>
+                <textElement textAlignment="Right">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Printed: " + new java.util.Date()]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <detail>
+        <band height="230">
+            <staticText>
+                <reportElement x="0" y="5" width="200" height="16"/>
+                <textElement><font size="11" isBold="true" isUnderline="true"/></textElement>
+                <text><![CDATA[Guest Details]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="25" width="90" height="16"/>
+                <text><![CDATA[Name:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="90" y="25" width="300" height="16"/>
+                <textFieldExpression><![CDATA[$F{guest_name}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="43" width="90" height="16"/>
+                <text><![CDATA[Phone:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="90" y="43" width="300" height="16"/>
+                <textFieldExpression><![CDATA[$F{guest_phone}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="61" width="90" height="16"/>
+                <text><![CDATA[Email:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="90" y="61" width="300" height="16"/>
+                <textFieldExpression><![CDATA[$F{guest_email}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="90" width="200" height="16"/>
+                <textElement><font size="11" isBold="true" isUnderline="true"/></textElement>
+                <text><![CDATA[Stay Details]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="110" width="120" height="16"/>
+                <text><![CDATA[Room:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="120" y="110" width="270" height="16"/>
+                <textFieldExpression><![CDATA[$F{room_number} + " (" + $F{room_type} + ")"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="128" width="120" height="16"/>
+                <text><![CDATA[Check-in:]]></text>
+            </staticText>
+            <textField pattern="dd-MMM-yyyy">
+                <reportElement x="120" y="128" width="150" height="16"/>
+                <textFieldExpression><![CDATA[$F{check_in_date}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="146" width="120" height="16"/>
+                <text><![CDATA[Check-out:]]></text>
+            </staticText>
+            <textField pattern="dd-MMM-yyyy">
+                <reportElement x="120" y="146" width="150" height="16"/>
+                <textFieldExpression><![CDATA[$F{check_out_date}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="164" width="120" height="16"/>
+                <text><![CDATA[Nights x Rate:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="120" y="164" width="270" height="16"/>
+                <textFieldExpression><![CDATA[$F{nights} + " nights x Rs. " + $F{rate_per_night}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="330" y="110" width="90" height="16"/>
+                <text><![CDATA[Payment method:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="330" y="128" width="205" height="16"/>
+                <textFieldExpression><![CDATA[$F{payment_method}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="330" y="146" width="90" height="16"/>
+                <text><![CDATA[Received by:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="330" y="164" width="205" height="16"/>
+                <textFieldExpression><![CDATA[$F{received_by_name}]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement x="0" y="190" width="535" height="1"/>
+            </line>
+            <staticText>
+                <reportElement x="300" y="196" width="120" height="20"/>
+                <textElement textAlignment="Right"><font size="13" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL DUE:]]></text>
+            </staticText>
+            <textField pattern="Rs. #,##0.00">
+                <reportElement x="425" y="196" width="110" height="20"/>
+                <textElement textAlignment="Right"><font size="13" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="535" height="16"/>
+                <textElement textAlignment="Center">
+                    <font size="8" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Thank you for staying with StayEase Hotel."]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>
