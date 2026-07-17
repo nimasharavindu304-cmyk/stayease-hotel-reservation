@@ -18,7 +18,7 @@ import java.util.List;
 
 public class RoomDAOImpl implements RoomDAO {
 
-    private Connection getConnection() {
+    private Connection getConnection() throws SQLException {
         return DBConnection.getInstance().getConnection();
     }
 

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class GuestDAOImpl implements GuestDAO {
 
-    private Connection getConnection() {
+    private Connection getConnection() throws SQLException {
         return DBConnection.getInstance().getConnection();
     }
 

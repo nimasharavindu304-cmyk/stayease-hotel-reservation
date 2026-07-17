@@ -16,4 +16,7 @@ public interface BookingDAO {
     boolean updateStatus(int bookingId, String status) throws SQLException;
     int countActiveBookingsToday() throws SQLException;
     java.math.BigDecimal totalRevenueBetween(LocalDate from, LocalDate to) throws SQLException;
+
+    /** Revenue per day for the last {@code days} days (zero-filled), oldest first. */
+    java.util.LinkedHashMap<LocalDate, java.math.BigDecimal> revenueLastDays(int days) throws SQLException;
 }

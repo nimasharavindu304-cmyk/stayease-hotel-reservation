@@ -12,52 +12,50 @@ import java.util.Properties;
  * <p>
  * Guarantees a single, shared JDBC {@link Connection} for the whole
  * application instead of every DAO opening its own connection. The
- * instance is created lazily and thread-safely on first use.
+ * connection is opened lazily on first use, and any failure is surfaced as
+ * a checked {@link SQLException} so the UI layer can report it gracefully
+ * instead of crashing.
  */
 public final class DBConnection {
 
-    private static volatile DBConnection instance;
+    private static DBConnection instance;
 
     private Connection connection;
 
     private DBConnection() {
-        try {
-            Properties props = loadProperties();
-            String url = props.getProperty("db.url");
-            String user = props.getProperty("db.user");
-            String password = props.getProperty("db.password");
-
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            this.connection = DriverManager.getConnection(url, user, password);
-        } catch (ClassNotFoundException | SQLException | IOException e) {
-            throw new RuntimeException("Failed to initialise database connection", e);
-        }
     }
 
-    /** Double-checked locking so only one instance is ever created. */
-    public static DBConnection getInstance() {
+    /** Single shared instance. */
+    public static synchronized DBConnection getInstance() {
         if (instance == null) {
-            synchronized (DBConnection.class) {
-                if (instance == null) {
-                    instance = new DBConnection();
-                }
-            }
+            instance = new DBConnection();
         }
         return instance;
     }
 
-    public Connection getConnection() {
+    /**
+     * Returns the shared connection, opening it on first use (or reopening it
+     * if it was closed).
+     *
+     * @throws SQLException if the driver is missing, config cannot be read,
+     *                      or the database cannot be reached / authenticated.
+     */
+    public Connection getConnection() throws SQLException {
         try {
             if (connection == null || connection.isClosed()) {
-                synchronized (DBConnection.class) {
-                    instance = new DBConnection();
-                }
-                return instance.connection;
+                Properties props = loadProperties();
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection(
+                        props.getProperty("db.url"),
+                        props.getProperty("db.user"),
+                        props.getProperty("db.password"));
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to verify database connection state", e);
+            return connection;
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC driver not found on the classpath", e);
+        } catch (IOException e) {
+            throw new SQLException("Could not read config.properties", e);
         }
-        return connection;
     }
 
     private static Properties loadProperties() throws IOException {

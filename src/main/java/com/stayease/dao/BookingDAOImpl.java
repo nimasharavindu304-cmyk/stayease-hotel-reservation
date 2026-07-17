@@ -17,7 +17,7 @@ import java.util.List;
 
 public class BookingDAOImpl implements BookingDAO {
 
-    private Connection getConnection() {
+    private Connection getConnection() throws SQLException {
         return DBConnection.getInstance().getConnection();
     }
 
@@ -138,6 +138,29 @@ public class BookingDAOImpl implements BookingDAO {
                 return rs.getBigDecimal(1);
             }
         }
+    }
+
+    @Override
+    public java.util.LinkedHashMap<LocalDate, BigDecimal> revenueLastDays(int days) throws SQLException {
+        java.util.LinkedHashMap<LocalDate, BigDecimal> result = new java.util.LinkedHashMap<>();
+        LocalDate today = LocalDate.now();
+        for (int i = days - 1; i >= 0; i--) {
+            result.put(today.minusDays(i), BigDecimal.ZERO);
+        }
+        String sql = "SELECT DATE(payment_date) AS d, COALESCE(SUM(amount), 0) AS total "
+                + "FROM payments WHERE payment_date >= ? GROUP BY DATE(payment_date)";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(today.minusDays(days - 1)));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    LocalDate d = rs.getDate("d").toLocalDate();
+                    if (result.containsKey(d)) {
+                        result.put(d, rs.getBigDecimal("total"));
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /** Joins bookings with guests and rooms so callers get human-readable names for free. */

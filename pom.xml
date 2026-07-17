@@ -23,6 +23,13 @@
     </properties>
 
     <dependencies>
+        <!-- FlatLaf: modern flat Look and Feel (the same family IntelliJ IDEA uses) -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
         <!-- MySQL JDBC Driver -->
         <dependency>
             <groupId>com.mysql</groupId>

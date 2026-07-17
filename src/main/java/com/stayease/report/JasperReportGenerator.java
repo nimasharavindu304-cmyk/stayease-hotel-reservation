@@ -32,6 +32,8 @@ public abstract class JasperReportGenerator {
             return JasperFillManager.fillReport(report, parameters, DBConnection.getInstance().getConnection());
         } catch (IOException e) {
             throw new JRException("Failed to read report template: " + getTemplatePath(), e);
+        } catch (java.sql.SQLException e) {
+            throw new JRException("Database error while generating report: " + e.getMessage(), e);
         }
     }
 

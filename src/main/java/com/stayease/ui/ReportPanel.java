@@ -37,10 +37,18 @@ public class ReportPanel extends JPanel {
     private final JPanel paramPanel = new JPanel(paramCards);
 
     public ReportPanel() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        setLayout(new BorderLayout(0, 16));
+        setBackground(UITheme.BG);
+        setBorder(BorderFactory.createEmptyBorder(22, 24, 22, 24));
+
+        JLabel heading = new JLabel("Reports");
+        heading.setFont(UITheme.FONT_H1);
+        heading.setForeground(UITheme.TEXT);
+        add(heading, BorderLayout.NORTH);
 
         JPanel top = new JPanel(new GridBagLayout());
+        top.setBackground(UITheme.CARD);
+        top.setBorder(UITheme.groupBorder("Generate a report"));
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(6, 6, 6, 6);
         c.anchor = GridBagConstraints.WEST;
@@ -56,23 +64,31 @@ public class ReportPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 2;
+        paramPanel.setOpaque(false);
         top.add(paramPanel, c);
 
         paramPanel.add(buildInvoiceParams(), ReportType.BOOKING_INVOICE.name());
         paramPanel.add(buildRevenueParams(), ReportType.REVENUE_SUMMARY.name());
 
         JButton previewButton = new JButton("Preview");
+        UITheme.secondary(previewButton);
         previewButton.addActionListener(e -> generate(false));
         JButton pdfButton = new JButton("Export to PDF");
+        UITheme.primary(pdfButton);
         pdfButton.addActionListener(e -> generate(true));
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        buttons.setOpaque(false);
         buttons.add(previewButton);
         buttons.add(pdfButton);
         c.gridy = 2;
         top.add(buttons, c);
 
-        add(top, BorderLayout.NORTH);
+        // Keep the card at its natural height at the top of the screen.
+        JPanel holder = new JPanel(new BorderLayout());
+        holder.setOpaque(false);
+        holder.add(top, BorderLayout.NORTH);
+        add(holder, BorderLayout.CENTER);
 
         loadBookings();
         fromDateSpinner.setEditor(new JSpinner.DateEditor(fromDateSpinner, "dd-MM-yyyy"));
@@ -82,14 +98,16 @@ public class ReportPanel extends JPanel {
     }
 
     private JPanel buildInvoiceParams() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        p.setOpaque(false);
         p.add(new JLabel("Booking:"));
         p.add(bookingCombo);
         return p;
     }
 
     private JPanel buildRevenueParams() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        p.setOpaque(false);
         p.add(new JLabel("From:"));
         p.add(fromDateSpinner);
         p.add(new JLabel("To:"));
